@@ -1,62 +1,47 @@
-/**
- * Return an array of arrays of size *returnSize.
- * The sizes of the arrays are returned as *returnColumnSizes array.
- * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().
- */
-
-int *sort(int *nums, int numsSize) {
-    int i, j ,temp;
-    for (i = 0; i < numsSize-1; i++) {
-        for (j = 0; j < numsSize-1-i; j++) {
-            if (nums[j] > nums[j+1]) {
-                temp = nums[j+1];
-                nums[j+1] = nums[j];
-                nums[j] = temp;
-            }
-        }
-    }
-    return nums;
+int comp(const void *a,const void *b)
+{
+    return *(int *)a - *(int *)b;
 }
 
 int** threeSum(int* nums, int numsSize, int* returnSize, int** returnColumnSizes){
     *returnSize = 0;
-    returnColumnSizes = NULL;
-    if (numsSize < 3) {
-        return NULL;
+    if (numsSize == 0) {
+        return 0;
     }
-    nums = sort(nums, numsSize);
-    int ** ans = NULL;
-    int a = 0, b = 1, c = 3;
-    while (a < numsSize - 2) {
-        printf("%d\n", a);
-        b = a + 1;
-        if (nums[a] + nums[a+1] + nums[a+2] > 0) break;
-        while (b < numsSize - 1) {
-            if (nums[a] + nums[b]> 0) break;
-            c = b + 1;
-            while (c < numsSize) {
-                int total = nums[a] + nums[b] + nums[c];
-                if (total == 0) {
-                    returnColumnSizes = realloc(returnColumnSizes, ((*returnSize)+1) * sizeof(int*));
-                    returnColumnSizes[*returnSize] = malloc(sizeof(int));
-                    ans = realloc(ans, (*returnSize+1) * sizeof(int*));
-                    ans[*returnSize] = malloc(3 * sizeof(int));
-                    ans[*returnSize][0] = nums[a];
-                    ans[*returnSize][1] = nums[b];
-                    ans[*returnSize][2] = nums[c];
-                    returnColumnSizes[*returnSize][0] = 0;
-                    *returnSize++;
-                    break;
-                } else if (total > 0) break;
-                while (c+1 < numsSize && nums[c] == nums[c+1]) c++;
-                c++;
+    int **ret = (int **)malloc(sizeof(int *) * (numsSize + 1) * 6);
+    *returnSize = 0;
+    short left = 0;
+    short right = numsSize - 1;;
+    int target = 0;
+    
+    *returnColumnSizes = malloc(sizeof(int) * (numsSize + 1) * 6);
+    qsort(nums, numsSize, sizeof(int), comp);
+    ret[*returnSize] = malloc(sizeof(int) * 3);
+
+    while (left + 1 < right) {
+        int i = left + 1;
+        int j = right;
+        target = 0 - nums[left];
+        while (i < j) {
+            if (nums[i] + nums[j] < target) {
+                i++;
+            } else if (nums[i] + nums[j] > target) {
+                j--;
+            } else {
+                ret[*returnSize][0] = nums[left];
+                ret[*returnSize][1] = nums[i];
+                ret[*returnSize][2] = nums[j];
+                (*returnColumnSizes)[*returnSize] = 3;
+                (*returnSize)++;
+                ret[*returnSize] = malloc(sizeof(int) * 3);
+
+                while(nums[i] == nums[++i] && i < j) {}
+                while(nums[j] == nums[--j] && i < j) {}
             }
-            while (b+1 < numsSize-1 && nums[b] == nums[b+1]) b++;
-            b++;
         }
-        while (a+1 < numsSize-2 && nums[a] == nums[a+1]) a++;
-        a++;
+        while(nums[left] == nums[++left] && left + 1 < right) {}
     }
-    printf("hello");
-    return ans;
+    
+    return ret;
 }
+
